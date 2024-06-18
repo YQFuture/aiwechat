@@ -1,13 +1,12 @@
 package handle
 
 import (
+	"aiwechat/application/utils"
 	"aiwechat/model"
 	"bytes"
 	"encoding/json"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/gorilla/websocket"
-	"io"
-	"log"
 )
 
 func GetGroupHeadImg(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.RequestModel) {
@@ -25,42 +24,18 @@ func GetGroupHeadImg(ws *websocket.Conn, bot *openwechat.Bot, messageModel *mode
 		if group.AvatarID() == messageModel.MessageTarget {
 
 			var buf bytes.Buffer
-			func() {
-				resp, err := group.GetAvatarResponse()
-				if err != nil {
-					return
-				}
-				if resp.ContentLength == 0 {
-					return
-				}
-				defer func(Body io.ReadCloser) {
-					err := Body.Close()
-					if err != nil {
-						log.Println("请求群头像返回体关闭失败:", err)
-					}
-				}(resp.Body)
-
-				if _, err := io.Copy(&buf, resp.Body); err != nil {
-					log.Println("请求群头像返回体复制失败:", err)
-					return
-				}
-			}()
-
+			resp, err := group.GetAvatarResponse()
+			if err != nil {
+				return
+			}
+			utils.RespToBuf(resp, &buf)
 			//构建标准返回体
 			responseModel := &model.ResponseModel{
 				Operation:     model.ReturnGroupHeadImg,
 				MessageTarget: group.AvatarID(),
 				FileData:      buf.Bytes(),
 			}
-			responseModelBytes, err := json.Marshal(responseModel)
-			if err != nil {
-				return
-			}
-
-			err = ws.WriteMessage(websocket.BinaryMessage, responseModelBytes)
-			if err != nil {
-				log.Println("返回群头像失败:", err)
-			}
+			model.ReturnModel(ws, responseModel)
 		}
 	}
 
@@ -80,26 +55,11 @@ func GetHeadImg(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.Req
 		if friend.AvatarID() == messageModel.MessageTarget {
 
 			var buf bytes.Buffer
-			func() {
-				resp, err := friend.GetAvatarResponse()
-				if err != nil {
-					return
-				}
-				if resp.ContentLength == 0 {
-					return
-				}
-				defer func(Body io.ReadCloser) {
-					err := Body.Close()
-					if err != nil {
-						log.Println("请求头像返回体关闭失败:", err)
-					}
-				}(resp.Body)
-
-				if _, err := io.Copy(&buf, resp.Body); err != nil {
-					log.Println("请求头像返回体复制失败:", err)
-					return
-				}
-			}()
+			resp, err := friend.GetAvatarResponse()
+			if err != nil {
+				return
+			}
+			utils.RespToBuf(resp, &buf)
 
 			//构建标准返回体
 			responseModel := &model.ResponseModel{
@@ -107,15 +67,7 @@ func GetHeadImg(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.Req
 				MessageTarget: friend.AvatarID(),
 				FileData:      buf.Bytes(),
 			}
-			responseModelBytes, err := json.Marshal(responseModel)
-			if err != nil {
-				return
-			}
-
-			err = ws.WriteMessage(websocket.BinaryMessage, responseModelBytes)
-			if err != nil {
-				log.Println("返回头像失败:", err)
-			}
+			model.ReturnModel(ws, responseModel)
 		}
 	}
 }
@@ -152,16 +104,7 @@ func GetGroupList(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.R
 		Operation: model.ReturnGroupList,
 		FileData:  groupListBytes,
 	}
-	responseModelBytes, err := json.Marshal(responseModel)
-	if err != nil {
-		return
-	}
-
-	err = ws.WriteMessage(websocket.BinaryMessage, responseModelBytes)
-	if err != nil {
-		log.Println("返回好友列表失败:", err)
-	}
-
+	model.ReturnModel(ws, responseModel)
 }
 
 func GetFriendList(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.RequestModel) {
@@ -197,13 +140,5 @@ func GetFriendList(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.
 		Operation: model.ReturnFriendList,
 		FileData:  friendListBytes,
 	}
-	responseModelBytes, err := json.Marshal(responseModel)
-	if err != nil {
-		return
-	}
-
-	err = ws.WriteMessage(websocket.BinaryMessage, responseModelBytes)
-	if err != nil {
-		log.Println("返回好友列表失败:", err)
-	}
+	model.ReturnModel(ws, responseModel)
 }

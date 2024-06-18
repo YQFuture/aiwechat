@@ -25,3 +25,9 @@ func MessageDispatcher(ws *websocket.Conn, bot *openwechat.Bot, messageModel *mo
 		//TODO
 	}
 }
+
+func ReceiveMessageAdapter(ws *websocket.Conn, bot *openwechat.Bot, msg *openwechat.Message) {
+	if msg.IsSendByFriend() {
+		ReceiveFriendMessage(ws, bot, msg)
+	}
+}
