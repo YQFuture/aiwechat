@@ -54,7 +54,11 @@ func Conn(c *gin.Context) {
 	}
 	//注册消息处理函数
 	bot.MessageHandler = func(msg *openwechat.Message) {
-		handle.ReceiveMessageAdapter(ws, bot, msg)
+		go handle.ReceiveMessageAdapter(ws, bot, msg)
+	}
+	//登录回调函数
+	bot.LoginCallBack = func(body openwechat.CheckLoginResponse) {
+		handle.LoginCallBack(ws, bot, body)
 	}
 
 	// 登录

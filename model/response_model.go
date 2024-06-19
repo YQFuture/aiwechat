@@ -10,6 +10,7 @@ import (
 // 操作
 const (
 	ReturnQrCodeUrl = iota + 1
+	ReturnUserInfo
 	ReturnFriendList
 	ReturnGroupList
 	ReturnMessage
@@ -24,7 +25,7 @@ const (
 )
 
 type ResponseModel struct {
-	Operation         int       `json:"operation" validate:"required"` //操作 1:返回登录二维码url 2:返回好友列表 3:返回群列表 4:返回消息 5:返回头像 6:返回群头像
+	Operation         int       `json:"operation" validate:"required"` //操作 1:返回登录二维码url 2:返回用户信息 3:返回好友列表 4:返回群列表 5:返回消息 6:返回头像 7:返回群头像
 	MessageType       int       `json:"messageType"`                   //消息类型 1:文本消息 2:图片消息 3:文件消息
 	MessageTargetType int       `json:"messageTargetType"`             //消息来源类型 1:好友 2:群
 	MessageTarget     string    `json:"messageTarget"`                 //消息来源

@@ -22,6 +22,6 @@ func ConnHandler(ws *websocket.Conn, bot *openwechat.Bot) {
 		err = json.Unmarshal(message, &messageModel)
 
 		//分发处理
-		MessageDispatcher(ws, bot, &messageModel)
+		go MessageDispatcher(ws, bot, &messageModel)
 	}
 }
