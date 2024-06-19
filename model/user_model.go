@@ -1,7 +1,7 @@
 package model
 
 type UserModel struct {
-	UserName string
-	NickName string
-	AvatarID string
+	UserName string `json:"userName"`
+	NickName string `json:"nickName"`
+	AvatarID string `json:"avatarID"`
 }

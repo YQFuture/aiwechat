@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+// MessageDispatcher 分发处理前端发送的请求
 func MessageDispatcher(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.RequestModel) {
 	//分发处理不同类型的消息
 	switch messageModel.Operation {
@@ -26,8 +27,12 @@ func MessageDispatcher(ws *websocket.Conn, bot *openwechat.Bot, messageModel *mo
 	}
 }
 
+// ReceiveMessageAdapter 分发处理接收到的消息
 func ReceiveMessageAdapter(ws *websocket.Conn, bot *openwechat.Bot, msg *openwechat.Message) {
 	if msg.IsSendByFriend() {
 		ReceiveFriendMessage(ws, bot, msg)
+	}
+	if msg.IsSendByGroup() {
+		ReceiveGroupMessage(ws, bot, msg)
 	}
 }

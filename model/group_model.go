@@ -1,6 +1,6 @@
 package model
 
 type GroupModel struct {
-	GroupName string
-	AvatarID  string
+	GroupName string `json:"groupName"`
+	AvatarID  string `json:"avatarID"`
 }
