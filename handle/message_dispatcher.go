@@ -35,5 +35,5 @@ func ReceiveMessageAdapter(ws *websocket.Conn, bot *openwechat.Bot, msg *openwec
 	if msg.IsSendByGroup() {
 		ReceiveGroupMessage(ws, bot, msg)
 	}
-
+	//TODO
 }
