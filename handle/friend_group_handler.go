@@ -134,7 +134,7 @@ func GetFriendList(ws *websocket.Conn, bot *openwechat.Bot) {
 	}
 
 	//创建好友列表
-	friendList := make([]*model.UserModel, 0)
+	friendList := model.UserModelList{}
 
 	for _, friend := range Friends {
 		userModel := &model.UserModel{
@@ -146,7 +146,10 @@ func GetFriendList(ws *websocket.Conn, bot *openwechat.Bot) {
 		friendList = append(friendList, userModel)
 	}
 
-	friendListBytes, err := json.Marshal(friendList)
+	//按照首字母分组
+	groupByInitial := model.GroupByInitial(friendList)
+
+	friendListBytes, err := json.Marshal(groupByInitial)
 	if err != nil {
 		return
 	}
