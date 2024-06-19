@@ -1,7 +1,9 @@
 package handle
 
 import (
+	"aiwechat/application/utils"
 	"aiwechat/model"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/eatmoreapple/openwechat"
@@ -22,16 +24,27 @@ func LoginCallBack(ws *websocket.Conn, bot *openwechat.Bot, body openwechat.Chec
 		if err != nil {
 			fmt.Println(err)
 		}
+
+		//获取用户头像
+		var buf bytes.Buffer
+		resp, err := self.GetAvatarResponse()
+		if err != nil {
+			return
+		}
+		utils.RespToBuf(resp, &buf)
+
 		userModel := &model.UserModel{
 			UserName: self.UserName,
 			NickName: self.NickName,
 			AvatarID: self.AvatarID(),
+			FileData: buf.Bytes(),
 		}
 		marshal, err := json.Marshal(userModel)
 		if err != nil {
 			log.Println("序列化登录用户信息失败", err)
 			return
 		}
+
 		responseModel := &model.ResponseModel{
 			Operation: model.ReturnUserInfo,
 			FileData:  marshal,
