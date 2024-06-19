@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"log"
+	"time"
 )
 
 func Conn(c *gin.Context) {
@@ -40,6 +41,7 @@ func Conn(c *gin.Context) {
 		responseModel := &model.ResponseModel{
 			Operation: model.ReturnQrCodeUrl,
 			Content:   url,
+			Timestamp: time.Now(),
 		}
 		responseModelBytes, err := json.Marshal(responseModel)
 		if err != nil {

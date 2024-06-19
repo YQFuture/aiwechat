@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/gorilla/websocket"
+	"time"
 )
 
 func GetGroupHeadImg(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.RequestModel) {
@@ -34,6 +35,7 @@ func GetGroupHeadImg(ws *websocket.Conn, bot *openwechat.Bot, messageModel *mode
 				Operation:     model.ReturnGroupHeadImg,
 				MessageTarget: group.AvatarID(),
 				FileData:      buf.Bytes(),
+				Timestamp:     time.Now(),
 			}
 			model.ReturnModel(ws, responseModel)
 		}
@@ -66,6 +68,7 @@ func GetHeadImg(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.Req
 				Operation:     model.ReturnHeadImg,
 				MessageTarget: friend.AvatarID(),
 				FileData:      buf.Bytes(),
+				Timestamp:     time.Now(),
 			}
 			model.ReturnModel(ws, responseModel)
 		}
@@ -103,6 +106,7 @@ func GetGroupList(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.R
 	responseModel := &model.ResponseModel{
 		Operation: model.ReturnGroupList,
 		FileData:  groupListBytes,
+		Timestamp: time.Now(),
 	}
 	model.ReturnModel(ws, responseModel)
 }
@@ -139,6 +143,7 @@ func GetFriendList(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.
 	responseModel := &model.ResponseModel{
 		Operation: model.ReturnFriendList,
 		FileData:  friendListBytes,
+		Timestamp: time.Now(),
 	}
 	model.ReturnModel(ws, responseModel)
 }
