@@ -43,7 +43,7 @@ func ReceiveGroupMessage(ws *websocket.Conn, msg *openwechat.Message) {
 	case openwechat.MsgTypeImage:
 		ReceiveImageMessage(ws, msg, model.GroupType)
 	case openwechat.MsgTypeVideo:
-		ReceiveFileMessage(ws, msg, model.GroupType)
+		ReceiveVideoMessage(ws, msg, model.GroupType)
 	}
 }
 
@@ -54,7 +54,7 @@ func ReceiveFriendMessage(ws *websocket.Conn, msg *openwechat.Message) {
 	case openwechat.MsgTypeImage:
 		ReceiveImageMessage(ws, msg, model.FriendType)
 	case openwechat.MsgTypeVideo:
-		ReceiveFileMessage(ws, msg, model.FriendType)
+		ReceiveVideoMessage(ws, msg, model.FriendType)
 	}
 }
 
@@ -103,7 +103,7 @@ func ReceiveImageMessage(ws *websocket.Conn, msg *openwechat.Message, messageTar
 	model.ReturnModel(ws, responseModel)
 }
 
-func ReceiveFileMessage(ws *websocket.Conn, msg *openwechat.Message, messageTargetType int) {
+func ReceiveVideoMessage(ws *websocket.Conn, msg *openwechat.Message, messageTargetType int) {
 	sender, err := msg.Sender()
 	if err != nil {
 		log.Println("获取文件消息发送者失败:", err)
@@ -120,7 +120,7 @@ func ReceiveFileMessage(ws *websocket.Conn, msg *openwechat.Message, messageTarg
 	//构建消息并返回
 	responseModel := &model.ResponseModel{
 		Operation:         model.ReturnMessage,
-		MessageType:       model.ImageMessage,
+		MessageType:       model.VideoMessage,
 		MessageTargetType: messageTargetType,
 		MessageTarget:     sender.AvatarID(),
 		FileName:          msg.FileName,

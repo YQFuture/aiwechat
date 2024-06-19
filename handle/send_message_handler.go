@@ -15,7 +15,7 @@ func SendMessage(bot *openwechat.Bot, messageModel *model.RequestModel) {
 
 	//如果消息类型是图片/文件, 则预先创建
 	var file *os.File
-	if messageModel.MessageType == model.ImageMessage || messageModel.MessageType == model.FileMessage {
+	if messageModel.MessageType == model.ImageMessage || messageModel.MessageType == model.VideoMessage {
 		file, err := os.Create(messageModel.FileName)
 		if err != nil {
 			log.Println("创建文件出错", err)
@@ -54,10 +54,10 @@ func SendMessage(bot *openwechat.Bot, messageModel *model.RequestModel) {
 					log.Println("发送图片消息出错", err)
 					return
 				}
-			case model.FileMessage:
-				_, err = friend.SendFile(file)
+			case model.VideoMessage:
+				_, err = friend.SendVideo(file)
 				if err != nil {
-					log.Println("发送文件消息出错", err)
+					log.Println("发送视频消息出错", err)
 					return
 				}
 			}
@@ -73,7 +73,7 @@ func SendGroupMessage(bot *openwechat.Bot, messageModel *model.RequestModel) {
 
 	//如果消息类型是图片/文件, 则预先创建
 	var file *os.File
-	if messageModel.MessageType == model.ImageMessage || messageModel.MessageType == model.FileMessage {
+	if messageModel.MessageType == model.ImageMessage || messageModel.MessageType == model.VideoMessage {
 		file, err := os.Create(messageModel.FileName)
 		if err != nil {
 			log.Println("创建文件出错", err)
@@ -112,10 +112,10 @@ func SendGroupMessage(bot *openwechat.Bot, messageModel *model.RequestModel) {
 					log.Println("发送图片消息出错", err)
 					return
 				}
-			case model.FileMessage:
-				_, err = group.SendFile(file)
+			case model.VideoMessage:
+				_, err = group.SendVideo(file)
 				if err != nil {
-					log.Println("发送文件消息出错", err)
+					log.Println("发送视频消息出错", err)
 					return
 				}
 			}
