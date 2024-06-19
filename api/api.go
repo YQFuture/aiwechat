@@ -34,6 +34,27 @@ func Conn(c *gin.Context) {
 
 	// 创建一个bot,一个bot对应一个登录的微信号。
 	bot := openwechat.DefaultBot(openwechat.Desktop)
+
+	//初始化bot配置
+	botInit(ws, bot)
+
+	// 登录
+	if err := bot.Login(); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// 处理消息
+	go handle.ConnHandler(ws, bot)
+
+	// 阻塞主goroutine, 直到发生异常或者用户主动退出
+	err = bot.Block()
+	if err != nil {
+		return
+	}
+}
+
+func botInit(ws *websocket.Conn, bot *openwechat.Bot) {
 	// 注册登录二维码回调
 	bot.UUIDCallback = func(uuid string) {
 		url := openwechat.GetQrcodeUrl(uuid)
@@ -59,20 +80,5 @@ func Conn(c *gin.Context) {
 	//登录回调函数
 	bot.LoginCallBack = func(body openwechat.CheckLoginResponse) {
 		handle.LoginCallBack(ws, bot, body)
-	}
-
-	// 登录
-	if err := bot.Login(); err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	// 处理消息
-	go handle.ConnHandler(ws, bot)
-
-	// 阻塞主goroutine, 直到发生异常或者用户主动退出
-	err = bot.Block()
-	if err != nil {
-		return
 	}
 }

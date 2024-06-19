@@ -42,7 +42,7 @@ func ReturnModel(ws *websocket.Conn, responseModel *ResponseModel) {
 	if err != nil {
 		return
 	}
-	err = ws.WriteMessage(websocket.BinaryMessage, responseModelBytes)
+	err = ws.WriteMessage(websocket.TextMessage, responseModelBytes)
 	if err != nil {
 		log.Println("返回消息失败:", err)
 	}
