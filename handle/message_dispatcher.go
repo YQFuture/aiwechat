@@ -15,13 +15,16 @@ func MessageDispatcher(ws *websocket.Conn, bot *openwechat.Bot, messageModel *mo
 	case model.SendGroupMessage:
 		SendGroupMessage(bot, messageModel)
 	case model.GetFriendList:
-		GetFriendList(ws, bot, messageModel)
+		GetFriendList(ws, bot)
 	case model.GetGroupList:
-		GetGroupList(ws, bot, messageModel)
+		GetGroupList(ws, bot)
 	case model.GetHeadImg:
 		GetHeadImg(ws, bot, messageModel)
 	case model.GetGroupHeadImg:
 		GetGroupHeadImg(ws, bot, messageModel)
+	case model.AcceptFriendRequest:
+		AcceptFriendRequest(ws, bot, messageModel)
+
 	default:
 		//TODO
 	}
@@ -30,10 +33,12 @@ func MessageDispatcher(ws *websocket.Conn, bot *openwechat.Bot, messageModel *mo
 // ReceiveMessageAdapter 分发处理接收到的消息
 func ReceiveMessageAdapter(ws *websocket.Conn, bot *openwechat.Bot, msg *openwechat.Message) {
 	if msg.IsSendByFriend() {
-		ReceiveFriendMessage(ws, bot, msg)
+		ReceiveFriendMessage(ws, msg)
 	}
 	if msg.IsSendByGroup() {
-		ReceiveGroupMessage(ws, bot, msg)
+		ReceiveGroupMessage(ws, msg)
 	}
-	//TODO
+	if msg.IsFriendAdd() {
+		ReceiveFriendAdd(ws, msg)
+	}
 }

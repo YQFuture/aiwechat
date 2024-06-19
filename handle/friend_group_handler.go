@@ -7,8 +7,20 @@ import (
 	"encoding/json"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/gorilla/websocket"
+	"log"
 	"time"
 )
+
+func AcceptFriendRequest(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.RequestModel) {
+	msg := messageModel.Msg
+	_, err := msg.Agree()
+	if err != nil {
+		log.Println("同意好友请求失败")
+		return
+	}
+	//同意好友请求后返回新的好友列表
+	GetFriendList(ws, bot)
+}
 
 func GetGroupHeadImg(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.RequestModel) {
 	self, err := bot.GetCurrentUser()
@@ -75,7 +87,7 @@ func GetHeadImg(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.Req
 	}
 }
 
-func GetGroupList(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.RequestModel) {
+func GetGroupList(ws *websocket.Conn, bot *openwechat.Bot) {
 	self, err := bot.GetCurrentUser()
 	if err != nil {
 		return
@@ -111,7 +123,7 @@ func GetGroupList(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.R
 	model.ReturnModel(ws, responseModel)
 }
 
-func GetFriendList(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.RequestModel) {
+func GetFriendList(ws *websocket.Conn, bot *openwechat.Bot) {
 	self, err := bot.GetCurrentUser()
 	if err != nil {
 		return

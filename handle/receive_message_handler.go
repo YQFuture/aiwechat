@@ -4,13 +4,39 @@ import (
 	"aiwechat/application/utils"
 	"aiwechat/model"
 	"bytes"
+	"encoding/json"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/gorilla/websocket"
 	"log"
 	"time"
 )
 
-func ReceiveGroupMessage(ws *websocket.Conn, bot *openwechat.Bot, msg *openwechat.Message) {
+func ReceiveFriendAdd(ws *websocket.Conn, msg *openwechat.Message) {
+	sender, err := msg.Sender()
+	if err != nil {
+		log.Println("获取好友请求消息发送者失败:", err)
+		return
+	}
+	friendAddMessageContent, err := msg.FriendAddMessageContent()
+	if err != nil {
+		log.Println("获取好友请求消息消息内容失败:", err)
+		return
+	}
+	marshal, err := json.Marshal(friendAddMessageContent)
+	//构建消息并返回
+	responseModel := &model.ResponseModel{
+		Operation:     model.ReturnMessage,
+		MessageType:   model.FriendAddMessage,
+		MessageTarget: sender.AvatarID(),
+		FileName:      msg.FileName,
+		FileData:      marshal,
+		Timestamp:     time.Now(),
+		Msg:           msg,
+	}
+	model.ReturnModel(ws, responseModel)
+}
+
+func ReceiveGroupMessage(ws *websocket.Conn, msg *openwechat.Message) {
 	switch msg.MsgType {
 	case openwechat.MsgTypeText:
 		ReceiveTextMessage(ws, msg, model.GroupType)
@@ -21,7 +47,7 @@ func ReceiveGroupMessage(ws *websocket.Conn, bot *openwechat.Bot, msg *openwecha
 	}
 }
 
-func ReceiveFriendMessage(ws *websocket.Conn, bot *openwechat.Bot, msg *openwechat.Message) {
+func ReceiveFriendMessage(ws *websocket.Conn, msg *openwechat.Message) {
 	switch msg.MsgType {
 	case openwechat.MsgTypeText:
 		ReceiveTextMessage(ws, msg, model.FriendType)
