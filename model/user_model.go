@@ -63,7 +63,7 @@ func getPinyinFirstLetter(nickname string) (rune, bool) {
 	return 0, false
 }
 
-func GroupByInitial(users []*UserModel) map[rune][]*UserModel {
+func UserGroupByInitial(users []*UserModel) map[rune][]*UserModel {
 	grouped := make(map[rune][]*UserModel)
 	var specialGroup []*UserModel
 
@@ -77,7 +77,6 @@ func GroupByInitial(users []*UserModel) map[rune][]*UserModel {
 		} else if unicode.Is(unicode.Han, firstRune) {
 			groupKey, found = getPinyinFirstLetter(user.NickName)
 			if !found {
-				// 如果获取拼音失败，视为特殊字符处理
 				groupKey = '#'
 			}
 		} else {
@@ -85,21 +84,18 @@ func GroupByInitial(users []*UserModel) map[rune][]*UserModel {
 		}
 
 		if groupKey == '#' {
-			// 特殊字符单独处理
 			specialGroup = append(specialGroup, user)
 		} else {
 			grouped[groupKey] = append(grouped[groupKey], user)
 		}
 	}
 
-	// 确保所有英文字母都有对应的分组，即使该字母没有匹配的用户
 	for char := 'a'; char <= 'z'; char++ {
 		if _, exists := grouped[char]; !exists {
 			grouped[char] = []*UserModel{}
 		}
 	}
 
-	// 添加特殊字符组
 	grouped['#'] = specialGroup
 
 	return grouped

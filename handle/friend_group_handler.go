@@ -98,7 +98,7 @@ func GetGroupList(ws *websocket.Conn, bot *openwechat.Bot) {
 	}
 
 	//创建群列表
-	groupList := make([]*model.GroupModel, 0)
+	groupList := model.GroupModelList{}
 
 	for _, group := range Groups {
 		groupModel := &model.GroupModel{
@@ -109,7 +109,10 @@ func GetGroupList(ws *websocket.Conn, bot *openwechat.Bot) {
 		groupList = append(groupList, groupModel)
 	}
 
-	groupListBytes, err := json.Marshal(groupList)
+	//按照首字母分组
+	groupByInitial := model.GroupGroupByInitial(groupList)
+
+	groupListBytes, err := json.Marshal(groupByInitial)
 	if err != nil {
 		return
 	}
@@ -147,7 +150,7 @@ func GetFriendList(ws *websocket.Conn, bot *openwechat.Bot) {
 	}
 
 	//按照首字母分组
-	groupByInitial := model.GroupByInitial(friendList)
+	groupByInitial := model.UserGroupByInitial(friendList)
 
 	friendListBytes, err := json.Marshal(groupByInitial)
 	if err != nil {
