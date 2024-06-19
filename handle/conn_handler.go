@@ -23,12 +23,5 @@ func ConnHandler(ws *websocket.Conn, bot *openwechat.Bot) {
 
 		//分发处理
 		MessageDispatcher(ws, bot, &messageModel)
-
-		// 发送消息回客户端
-		err = ws.WriteMessage(websocket.TextMessage, append([]byte("Server Received: "), message...))
-		if err != nil {
-			log.Println("Write:", err)
-			break
-		}
 	}
 }
