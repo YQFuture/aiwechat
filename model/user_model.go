@@ -25,18 +25,18 @@ func (a UserModelList) Swap(i, j int) {
 }
 
 func (a UserModelList) Less(i, j int) bool {
-	iStartsWithSymbol, jStartsWithSymbol := !isLetterOrChinese([]rune(a[i].NickName)[0]), !isLetterOrChinese([]rune(a[j].NickName)[0])
+	iStartsWithSymbol, jStartsWithSymbol := !isLetterOrChinese([]rune(a[i].RemarkName)[0]), !isLetterOrChinese([]rune(a[j].RemarkName)[0])
 
 	if iStartsWithSymbol && jStartsWithSymbol {
-		return a[i].NickName < a[j].NickName
+		return a[i].RemarkName < a[j].RemarkName
 	} else if iStartsWithSymbol {
 		return false
 	} else if jStartsWithSymbol {
 		return true
 	}
 
-	pinyinI := getFirstPinyin(a[i].NickName)
-	pinyinJ := getFirstPinyin(a[j].NickName)
+	pinyinI := getFirstPinyin(a[i].RemarkName)
+	pinyinJ := getFirstPinyin(a[j].RemarkName)
 
 	return strings.ToLower(pinyinI) < strings.ToLower(pinyinJ)
 }
@@ -53,8 +53,8 @@ func getFirstPinyin(name string) string {
 	return string([]rune(name)[0])
 }
 
-func getPinyinFirstLetter(nickname string) (rune, bool) {
-	pinyinList := pinyin.LazyPinyin(nickname, pinyin.NewArgs())
+func getPinyinFirstLetter(name string) (rune, bool) {
+	pinyinList := pinyin.LazyPinyin(name, pinyin.NewArgs())
 	if len(pinyinList) > 0 {
 		firstLetter := rune(strings.ToLower(pinyinList[0])[0])
 		if unicode.IsLetter(firstLetter) {
@@ -69,15 +69,19 @@ func UserGroupByInitial(users []*UserModel) map[rune][]*UserModel {
 	var specialGroup []*UserModel
 
 	for _, user := range users {
-		firstRune := rune(strings.ToLower(user.NickName)[0])
 		var groupKey rune
 		var found bool
 
-		if unicode.IsLetter(firstRune) {
-			groupKey = firstRune
-		} else if unicode.Is(unicode.Han, firstRune) {
-			groupKey, found = getPinyinFirstLetter(user.NickName)
-			if !found {
+		if len(user.RemarkName) != 0 {
+			firstRune := rune(strings.ToLower(user.RemarkName)[0])
+			if unicode.IsLetter(firstRune) {
+				groupKey = firstRune
+			} else if unicode.Is(unicode.Han, firstRune) {
+				groupKey, found = getPinyinFirstLetter(user.RemarkName)
+				if !found {
+					groupKey = '#'
+				}
+			} else {
 				groupKey = '#'
 			}
 		} else {

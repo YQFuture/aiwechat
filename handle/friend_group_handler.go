@@ -186,14 +186,15 @@ func GetFriendList(ws *websocket.Conn, bot *openwechat.Bot) {
 
 	//创建好友列表
 	friendList := model.UserModelList{}
-
 	for _, friend := range Friends {
-		//获取用户头像
-
+		remarkName := friend.RemarkName
+		if len(friend.RemarkName) == 0 {
+			remarkName = friend.NickName
+		}
 		userModel := &model.UserModel{
 			UserName:   friend.UserName,
 			NickName:   friend.NickName,
-			RemarkName: friend.RemarkName,
+			RemarkName: remarkName,
 			AvatarID:   friend.AvatarID(),
 		}
 		//将解析的好友列表保存到切片中
@@ -239,10 +240,14 @@ func GetFriendHeadImgList(ws *websocket.Conn, bot *openwechat.Bot) {
 		}
 		utils.RespToBuf(resp, &buf)
 
+		remarkName := friend.RemarkName
+		if len(friend.RemarkName) == 0 {
+			remarkName = friend.NickName
+		}
 		userModel := &model.UserModel{
 			UserName:   friend.UserName,
 			NickName:   friend.NickName,
-			RemarkName: friend.RemarkName,
+			RemarkName: remarkName,
 			AvatarID:   friend.AvatarID(),
 			FileData:   buf.Bytes(),
 		}
