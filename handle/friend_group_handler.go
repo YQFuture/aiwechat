@@ -126,6 +126,54 @@ func GetGroupList(ws *websocket.Conn, bot *openwechat.Bot) {
 	model.ReturnModel(ws, responseModel)
 }
 
+func GetGroupHeadImgList(ws *websocket.Conn, bot *openwechat.Bot) {
+	self, err := bot.GetCurrentUser()
+	if err != nil {
+		return
+	}
+	Groups, err := self.Groups()
+	if err != nil {
+		return
+	}
+
+	//创建群列表
+	groupList := model.GroupModelList{}
+
+	for _, group := range Groups {
+		//获取群头像
+		var buf bytes.Buffer
+		resp, err := group.GetAvatarResponse()
+		if err != nil {
+			return
+		}
+		utils.RespToBuf(resp, &buf)
+
+		groupModel := &model.GroupModel{
+			GroupName: group.NickName,
+			AvatarID:  group.AvatarID(),
+			FileData:  buf.Bytes(),
+		}
+		//将解析的群保存到列表中
+		groupList = append(groupList, groupModel)
+	}
+
+	//按照首字母分组
+	groupByInitial := model.GroupGroupByInitial(groupList)
+
+	groupListBytes, err := json.Marshal(groupByInitial)
+	if err != nil {
+		return
+	}
+
+	//构建标准返回体
+	responseModel := &model.ResponseModel{
+		Operation: model.ReturnGroupHeadImg,
+		FileData:  groupListBytes,
+		Timestamp: time.Now(),
+	}
+	model.ReturnModel(ws, responseModel)
+}
+
 func GetFriendList(ws *websocket.Conn, bot *openwechat.Bot) {
 	self, err := bot.GetCurrentUser()
 	if err != nil {
@@ -140,10 +188,13 @@ func GetFriendList(ws *websocket.Conn, bot *openwechat.Bot) {
 	friendList := model.UserModelList{}
 
 	for _, friend := range Friends {
+		//获取用户头像
+
 		userModel := &model.UserModel{
-			UserName: friend.UserName,
-			NickName: friend.NickName,
-			AvatarID: friend.AvatarID(),
+			UserName:   friend.UserName,
+			NickName:   friend.NickName,
+			RemarkName: friend.RemarkName,
+			AvatarID:   friend.AvatarID(),
 		}
 		//将解析的好友列表保存到切片中
 		friendList = append(friendList, userModel)
@@ -160,6 +211,56 @@ func GetFriendList(ws *websocket.Conn, bot *openwechat.Bot) {
 	//构建标准返回体
 	responseModel := &model.ResponseModel{
 		Operation: model.ReturnFriendList,
+		FileData:  friendListBytes,
+		Timestamp: time.Now(),
+	}
+	model.ReturnModel(ws, responseModel)
+}
+
+func GetFriendHeadImgList(ws *websocket.Conn, bot *openwechat.Bot) {
+	self, err := bot.GetCurrentUser()
+	if err != nil {
+		return
+	}
+	Friends, err := self.Friends()
+	if err != nil {
+		return
+	}
+
+	//创建好友列表
+	friendList := model.UserModelList{}
+
+	for _, friend := range Friends {
+		//获取用户头像
+		var buf bytes.Buffer
+		resp, err := friend.GetAvatarResponse()
+		if err != nil {
+			return
+		}
+		utils.RespToBuf(resp, &buf)
+
+		userModel := &model.UserModel{
+			UserName:   friend.UserName,
+			NickName:   friend.NickName,
+			RemarkName: friend.RemarkName,
+			AvatarID:   friend.AvatarID(),
+			FileData:   buf.Bytes(),
+		}
+		//将解析的好友列表保存到切片中
+		friendList = append(friendList, userModel)
+	}
+
+	//按照首字母分组
+	groupByInitial := model.UserGroupByInitial(friendList)
+
+	friendListBytes, err := json.Marshal(groupByInitial)
+	if err != nil {
+		return
+	}
+
+	//构建标准返回体
+	responseModel := &model.ResponseModel{
+		Operation: model.ReturnHeadImg,
 		FileData:  friendListBytes,
 		Timestamp: time.Now(),
 	}

@@ -22,8 +22,10 @@ func MessageDispatcher(ws *websocket.Conn, bot *openwechat.Bot, messageModel *mo
 		SendGroupMessage(bot, messageModel)
 	case model.GetFriendList:
 		GetFriendList(ws, bot)
+		GetFriendHeadImgList(ws, bot)
 	case model.GetGroupList:
 		GetGroupList(ws, bot)
+		GetGroupHeadImgList(ws, bot)
 	case model.GetHeadImg:
 		GetHeadImg(ws, bot, messageModel)
 	case model.GetGroupHeadImg:

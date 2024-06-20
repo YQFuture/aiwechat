@@ -7,10 +7,11 @@ import (
 )
 
 type UserModel struct {
-	UserName string `json:"userName"`
-	NickName string `json:"nickName"`
-	AvatarID string `json:"avatarID"`
-	FileData []byte `json:"fileData"`
+	UserName   string `json:"userName"`
+	NickName   string `json:"nickName"`
+	RemarkName string `json:"remarkName"`
+	AvatarID   string `json:"avatarID"`
+	FileData   []byte `json:"fileData"`
 }
 
 type UserModelList []*UserModel
