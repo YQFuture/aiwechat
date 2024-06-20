@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/gorilla/websocket"
+	"github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -12,3 +13,5 @@ var UPGRADER = websocket.Upgrader{
 		return true // 允许任何源的连接
 	},
 }
+
+var Logger *logrus.Logger

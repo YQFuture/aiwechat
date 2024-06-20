@@ -1,10 +1,10 @@
 package model
 
 import (
+	"aiwechat/application/utils"
 	"encoding/json"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/gorilla/websocket"
-	"log"
 	"time"
 )
 
@@ -46,6 +46,6 @@ func ReturnModel(ws *websocket.Conn, responseModel *ResponseModel) {
 	}
 	err = ws.WriteMessage(websocket.TextMessage, responseModelBytes)
 	if err != nil {
-		log.Println("返回消息失败:", err)
+		utils.Logger.Errorln("返回消息失败:", err)
 	}
 }

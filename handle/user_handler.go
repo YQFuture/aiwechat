@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/gorilla/websocket"
-	"log"
 	"time"
 )
 
@@ -16,7 +15,7 @@ func LoginCallBack(ws *websocket.Conn, bot *openwechat.Bot, body openwechat.Chec
 	fmt.Println(string(body))
 	code, err := body.Code()
 	if err != nil {
-		log.Println("获取登录返回码值失败", err)
+		utils.Logger.Errorln("获取登录返回码值失败", err)
 		return
 	}
 	if code == openwechat.LoginCodeSuccess {
@@ -41,7 +40,7 @@ func LoginCallBack(ws *websocket.Conn, bot *openwechat.Bot, body openwechat.Chec
 		}
 		marshal, err := json.Marshal(userModel)
 		if err != nil {
-			log.Println("序列化登录用户信息失败", err)
+			utils.Logger.Errorln("序列化登录用户信息失败", err)
 			return
 		}
 

@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/gorilla/websocket"
-	"log"
 	"time"
 )
 
@@ -18,7 +17,7 @@ func AcceptFriendRequest(ws *websocket.Conn, bot *openwechat.Bot, messageModel *
 		msg := value.(*openwechat.Message)
 		_, err := msg.Agree()
 		if err != nil {
-			log.Println("同意好友请求失败")
+			utils.Logger.Errorln("同意好友请求失败")
 			return
 		}
 		MsgMap.Delete(msgId)

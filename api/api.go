@@ -19,7 +19,7 @@ func Conn(c *gin.Context) {
 	w := c.Writer
 	ws, err := utils.UPGRADER.Upgrade(w, r, nil)
 	if err != nil {
-		log.Println("升级连接为WebSocket连接失败", err)
+		utils.Logger.Errorln("升级连接为WebSocket连接失败", err)
 		c.JSON(400, gin.H{
 			"message": "升级连接为WebSocket连接失败",
 		})
@@ -31,6 +31,8 @@ func Conn(c *gin.Context) {
 			log.Fatal("WebSocket连接关闭失败", err)
 		}
 	}(ws)
+
+	utils.Logger.Infoln("websocket 连接成功")
 
 	// 创建一个bot,一个bot对应一个登录的微信号。
 	bot := openwechat.DefaultBot(openwechat.Desktop)
