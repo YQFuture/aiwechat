@@ -36,6 +36,7 @@ type ResponseModel struct {
 	Timestamp         time.Time           `json:"timestamp"`                     //时间戳
 	Msg               *openwechat.Message `json:"msg"`                           //系统消息体 同意好友申请时需原样返回
 	MsgUserModel      *UserModel          `json:"msgUserModel"`                  //消息来源的用户对象 在收到群消息时可以使用该对象获取发送者昵称和头像
+	MsgGroupModel     *GroupModel         `json:"msgGroupModel"`                 //消息来源的群对象 在收到群消息时可以使用该对象获取群名称和头像
 }
 
 func ReturnModel(ws *websocket.Conn, responseModel *ResponseModel) {

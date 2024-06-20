@@ -74,8 +74,10 @@ func ReceiveTextMessage(ws *websocket.Conn, msg *openwechat.Message, messageTarg
 		return
 	}
 	var userModel *model.UserModel
+	var groupModel *model.GroupModel
 	if messageTargetType == model.GroupType {
 		userModel = getGroupMsgUserModel(msg)
+		groupModel = getGroupMsgGroupModel(msg)
 	}
 	text := msg.Content
 	responseModel := &model.ResponseModel{
@@ -86,6 +88,7 @@ func ReceiveTextMessage(ws *websocket.Conn, msg *openwechat.Message, messageTarg
 		Content:           text,
 		Timestamp:         time.Now(),
 		MsgUserModel:      userModel,
+		MsgGroupModel:     groupModel,
 	}
 	model.ReturnModel(ws, responseModel)
 }
@@ -97,8 +100,10 @@ func ReceiveImageMessage(ws *websocket.Conn, msg *openwechat.Message, messageTar
 		return
 	}
 	var userModel *model.UserModel
+	var groupModel *model.GroupModel
 	if messageTargetType == model.GroupType {
 		userModel = getGroupMsgUserModel(msg)
+		groupModel = getGroupMsgGroupModel(msg)
 	}
 	picture, err := msg.GetPicture()
 	if err != nil {
@@ -118,6 +123,7 @@ func ReceiveImageMessage(ws *websocket.Conn, msg *openwechat.Message, messageTar
 		FileData:          buf.Bytes(),
 		Timestamp:         time.Now(),
 		MsgUserModel:      userModel,
+		MsgGroupModel:     groupModel,
 	}
 	model.ReturnModel(ws, responseModel)
 }
@@ -129,8 +135,10 @@ func ReceiveVideoMessage(ws *websocket.Conn, msg *openwechat.Message, messageTar
 		return
 	}
 	var userModel *model.UserModel
+	var groupModel *model.GroupModel
 	if messageTargetType == model.GroupType {
 		userModel = getGroupMsgUserModel(msg)
+		groupModel = getGroupMsgGroupModel(msg)
 	}
 	file, err := msg.GetVideo()
 	if err != nil {
@@ -150,6 +158,7 @@ func ReceiveVideoMessage(ws *websocket.Conn, msg *openwechat.Message, messageTar
 		FileData:          buf.Bytes(),
 		Timestamp:         time.Now(),
 		MsgUserModel:      userModel,
+		MsgGroupModel:     groupModel,
 	}
 	model.ReturnModel(ws, responseModel)
 }
@@ -191,4 +200,26 @@ func getGroupMsgUserModel(msg *openwechat.Message) (userModel *model.UserModel) 
 	}
 
 	return userModel
+}
+
+func getGroupMsgGroupModel(msg *openwechat.Message) (groupModel *model.GroupModel) {
+	sender, err := msg.Sender()
+	if err != nil {
+		log.Println("获取群消息发送群失败:", err)
+		return
+	}
+	var buf bytes.Buffer
+	resp, err := sender.GetAvatarResponse()
+	if err != nil {
+		return
+	}
+	utils.RespToBuf(resp, &buf)
+
+	groupModel = &model.GroupModel{
+		GroupName: sender.NickName,
+		AvatarID:  sender.AvatarID(),
+		FileData:  buf.Bytes(),
+	}
+
+	return groupModel
 }
