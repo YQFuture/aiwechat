@@ -3,7 +3,6 @@ package model
 import (
 	"github.com/mozillazg/go-pinyin"
 	"strings"
-	"unicode"
 )
 
 type UserModel struct {
@@ -16,48 +15,15 @@ type UserModel struct {
 
 type UserModelList []*UserModel
 
-func (a UserModelList) Len() int {
-	return len(a)
-}
-
-func (a UserModelList) Swap(i, j int) {
-	a[i], a[j] = a[j], a[i]
-}
-
-func (a UserModelList) Less(i, j int) bool {
-	iStartsWithSymbol, jStartsWithSymbol := !isLetterOrChinese([]rune(a[i].RemarkName)[0]), !isLetterOrChinese([]rune(a[j].RemarkName)[0])
-
-	if iStartsWithSymbol && jStartsWithSymbol {
-		return a[i].RemarkName < a[j].RemarkName
-	} else if iStartsWithSymbol {
-		return false
-	} else if jStartsWithSymbol {
-		return true
-	}
-
-	pinyinI := getFirstPinyin(a[i].RemarkName)
-	pinyinJ := getFirstPinyin(a[j].RemarkName)
-
-	return strings.ToLower(pinyinI) < strings.ToLower(pinyinJ)
-}
-
-func isLetterOrChinese(r rune) bool {
-	return unicode.IsLetter(r) || unicode.Is(unicode.Han, r)
-}
-
-func getFirstPinyin(name string) string {
-	pinyinList := pinyin.LazyPinyin(name, pinyin.NewArgs())
-	if len(pinyinList) > 0 {
-		return pinyinList[0]
-	}
-	return string([]rune(name)[0])
+func isEnglishLetter(r rune) bool {
+	return r >= 'A' && r <= 'Z' || r >= 'a' && r <= 'z'
 }
 
 func getPinyinFirstLetter(name string) (rune, bool) {
 	pinyinList := pinyin.LazyPinyin(name, pinyin.NewArgs())
 	if len(pinyinList) > 0 {
 		firstLetter := rune(strings.ToLower(pinyinList[0])[0])
-		if unicode.IsLetter(firstLetter) {
+		if isEnglishLetter(firstLetter) {
 			return firstLetter, true
 		}
 	}
@@ -69,23 +35,17 @@ func UserGroupByInitial(users []*UserModel) map[rune][]*UserModel {
 	var specialGroup []*UserModel
 
 	for _, user := range users {
+		firstRune := rune(strings.ToLower(user.RemarkName)[0])
 		var groupKey rune
 		var found bool
 
-		if len(user.RemarkName) != 0 {
-			firstRune := rune(strings.ToLower(user.RemarkName)[0])
-			if unicode.IsLetter(firstRune) {
-				groupKey = firstRune
-			} else if unicode.Is(unicode.Han, firstRune) {
-				groupKey, found = getPinyinFirstLetter(user.RemarkName)
-				if !found {
-					groupKey = '#'
-				}
-			} else {
+		if isEnglishLetter(firstRune) {
+			groupKey = firstRune
+		} else {
+			groupKey, found = getPinyinFirstLetter(user.RemarkName)
+			if !found {
 				groupKey = '#'
 			}
-		} else {
-			groupKey = '#'
 		}
 
 		if groupKey == '#' {

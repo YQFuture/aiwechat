@@ -109,10 +109,7 @@ func GetGroupList(ws *websocket.Conn, bot *openwechat.Bot) {
 		groupList = append(groupList, groupModel)
 	}
 
-	//按照首字母分组
-	groupByInitial := model.GroupGroupByInitial(groupList)
-
-	groupListBytes, err := json.Marshal(groupByInitial)
+	groupListBytes, err := json.Marshal(groupList)
 	if err != nil {
 		return
 	}
@@ -157,10 +154,7 @@ func GetGroupHeadImgList(ws *websocket.Conn, bot *openwechat.Bot) {
 		groupList = append(groupList, groupModel)
 	}
 
-	//按照首字母分组
-	groupByInitial := model.GroupGroupByInitial(groupList)
-
-	groupListBytes, err := json.Marshal(groupByInitial)
+	groupListBytes, err := json.Marshal(groupList)
 	if err != nil {
 		return
 	}
