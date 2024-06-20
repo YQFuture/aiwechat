@@ -44,6 +44,8 @@ func ReceiveGroupMessage(ws *websocket.Conn, msg *openwechat.Message) {
 		ReceiveImageMessage(ws, msg, model.GroupType)
 	case openwechat.MsgTypeVideo:
 		ReceiveVideoMessage(ws, msg, model.GroupType)
+	default:
+		ReceiveUnknownMessage(ws, msg, model.GroupType)
 	}
 }
 
@@ -55,6 +57,8 @@ func ReceiveFriendMessage(ws *websocket.Conn, msg *openwechat.Message) {
 		ReceiveImageMessage(ws, msg, model.FriendType)
 	case openwechat.MsgTypeVideo:
 		ReceiveVideoMessage(ws, msg, model.FriendType)
+	default:
+		ReceiveUnknownMessage(ws, msg, model.FriendType)
 	}
 }
 
@@ -64,6 +68,10 @@ func ReceiveTextMessage(ws *websocket.Conn, msg *openwechat.Message, messageTarg
 		log.Println("获取文本消息发送者失败:", err)
 		return
 	}
+	var userModel *model.UserModel
+	if messageTargetType == model.GroupType {
+		userModel = getGroupMsgUserModel(msg)
+	}
 	text := msg.Content
 	responseModel := &model.ResponseModel{
 		Operation:         model.ReturnMessage,
@@ -72,6 +80,7 @@ func ReceiveTextMessage(ws *websocket.Conn, msg *openwechat.Message, messageTarg
 		MessageTarget:     sender.AvatarID(),
 		Content:           text,
 		Timestamp:         time.Now(),
+		MsgUserModel:      userModel,
 	}
 	model.ReturnModel(ws, responseModel)
 }
@@ -81,6 +90,10 @@ func ReceiveImageMessage(ws *websocket.Conn, msg *openwechat.Message, messageTar
 	if err != nil {
 		log.Println("获取图片消息发送者失败:", err)
 		return
+	}
+	var userModel *model.UserModel
+	if messageTargetType == model.GroupType {
+		userModel = getGroupMsgUserModel(msg)
 	}
 	picture, err := msg.GetPicture()
 	if err != nil {
@@ -99,6 +112,7 @@ func ReceiveImageMessage(ws *websocket.Conn, msg *openwechat.Message, messageTar
 		FileName:          msg.FileName,
 		FileData:          buf.Bytes(),
 		Timestamp:         time.Now(),
+		MsgUserModel:      userModel,
 	}
 	model.ReturnModel(ws, responseModel)
 }
@@ -108,6 +122,10 @@ func ReceiveVideoMessage(ws *websocket.Conn, msg *openwechat.Message, messageTar
 	if err != nil {
 		log.Println("获取文件消息发送者失败:", err)
 		return
+	}
+	var userModel *model.UserModel
+	if messageTargetType == model.GroupType {
+		userModel = getGroupMsgUserModel(msg)
 	}
 	file, err := msg.GetVideo()
 	if err != nil {
@@ -126,6 +144,46 @@ func ReceiveVideoMessage(ws *websocket.Conn, msg *openwechat.Message, messageTar
 		FileName:          msg.FileName,
 		FileData:          buf.Bytes(),
 		Timestamp:         time.Now(),
+		MsgUserModel:      userModel,
 	}
 	model.ReturnModel(ws, responseModel)
+}
+
+func ReceiveUnknownMessage(ws *websocket.Conn, msg *openwechat.Message, messageTargetType int) {
+	sender, err := msg.Sender()
+	if err != nil {
+		log.Println("获取未知消息发送者失败:", err)
+		return
+	}
+	responseModel := &model.ResponseModel{
+		Operation:         model.ReturnMessage,
+		MessageType:       model.UnknownMessage,
+		MessageTargetType: messageTargetType,
+		MessageTarget:     sender.AvatarID(),
+		Timestamp:         time.Now(),
+	}
+	model.ReturnModel(ws, responseModel)
+}
+
+func getGroupMsgUserModel(msg *openwechat.Message) (userModel *model.UserModel) {
+	groupMsgUser, err := msg.SenderInGroup()
+	if err != nil {
+		log.Println("获取群消息发送者失败:", err)
+		return
+	}
+	var buf bytes.Buffer
+	resp, err := groupMsgUser.GetAvatarResponse()
+	if err != nil {
+		return
+	}
+	utils.RespToBuf(resp, &buf)
+
+	userModel = &model.UserModel{
+		UserName: groupMsgUser.UserName,
+		NickName: groupMsgUser.NickName,
+		AvatarID: groupMsgUser.AvatarID(),
+		FileData: buf.Bytes(),
+	}
+
+	return userModel
 }

@@ -45,11 +45,9 @@ func ReceiveMessageAdapter(ws *websocket.Conn, bot *openwechat.Bot, msg *openwec
 	}()
 	if msg.IsSendByFriend() {
 		ReceiveFriendMessage(ws, msg)
-	}
-	if msg.IsSendByGroup() {
+	} else if msg.IsSendByGroup() {
 		ReceiveGroupMessage(ws, msg)
-	}
-	if msg.IsFriendAdd() {
+	} else if msg.IsFriendAdd() {
 		ReceiveFriendAdd(ws, msg)
 	}
 }

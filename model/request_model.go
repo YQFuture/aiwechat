@@ -22,6 +22,7 @@ const (
 	ImageMessage
 	VideoMessage
 	FriendAddMessage = 11
+	UnknownMessage   = 21
 )
 
 type RequestModel struct {
