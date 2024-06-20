@@ -12,14 +12,20 @@ import (
 )
 
 func AcceptFriendRequest(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.RequestModel) {
-	msg := messageModel.Msg
-	_, err := msg.Agree()
-	if err != nil {
-		log.Println("同意好友请求失败")
-		return
+	msgId := messageModel.Msg.MsgId
+	value, ok := MsgMap.Load(msgId)
+	if ok {
+		msg := value.(*openwechat.Message)
+		_, err := msg.Agree()
+		if err != nil {
+			log.Println("同意好友请求失败")
+			return
+		}
+		MsgMap.Delete(msgId)
+		//同意好友请求后返回新的好友列表
+		GetFriendList(ws, bot)
+		GetFriendHeadImgList(ws, bot)
 	}
-	//同意好友请求后返回新的好友列表
-	GetFriendList(ws, bot)
 }
 
 func GetGroupHeadImg(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.RequestModel) {

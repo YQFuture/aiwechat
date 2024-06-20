@@ -8,8 +8,12 @@ import (
 	"github.com/eatmoreapple/openwechat"
 	"github.com/gorilla/websocket"
 	"log"
+	"sync"
 	"time"
 )
+
+// MsgMap 保存好友请求等消息
+var MsgMap sync.Map
 
 func ReceiveFriendAdd(ws *websocket.Conn, msg *openwechat.Message) {
 	sender, err := msg.Sender()
@@ -33,6 +37,7 @@ func ReceiveFriendAdd(ws *websocket.Conn, msg *openwechat.Message) {
 		Timestamp:     time.Now(),
 		Msg:           msg,
 	}
+	MsgMap.Store(msg.MsgId, msg)
 	model.ReturnModel(ws, responseModel)
 }
 
