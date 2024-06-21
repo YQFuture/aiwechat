@@ -13,6 +13,7 @@ import (
 
 // MsgMap 保存好友请求等消息
 var MsgMap sync.Map
+var GroupMap sync.Map
 
 func ReceiveFriendAdd(ws *websocket.Conn, msg *openwechat.Message) {
 	sender, err := msg.Sender()
@@ -41,6 +42,10 @@ func ReceiveFriendAdd(ws *websocket.Conn, msg *openwechat.Message) {
 }
 
 func ReceiveGroupMessage(ws *websocket.Conn, msg *openwechat.Message) {
+	//过滤掉自己发送的群消息
+	if msg.IsSendBySelf() {
+		return
+	}
 	switch msg.MsgType {
 	case openwechat.MsgTypeText:
 		ReceiveTextMessage(ws, msg, model.GroupType)
@@ -195,23 +200,27 @@ func ReceiveUnknownMessage(ws *websocket.Conn, msg *openwechat.Message, messageT
 }
 
 func getFriendMsgUserModel(msg *openwechat.Message) (userModel *model.UserModel) {
-	groupMsgUser, err := msg.Sender()
+	friend, err := msg.Sender()
 	if err != nil {
 		utils.Logger.Errorln("获取群消息发送者失败:", err)
 		return
 	}
 	var buf bytes.Buffer
-	resp, err := groupMsgUser.GetAvatarResponse()
+	resp, err := friend.GetAvatarResponse()
 	if err != nil {
 		return
 	}
 	utils.RespToBuf(resp, &buf)
-
+	remarkName := friend.RemarkName
+	if len(friend.RemarkName) == 0 {
+		remarkName = friend.NickName
+	}
 	userModel = &model.UserModel{
-		UserName: groupMsgUser.UserName,
-		NickName: groupMsgUser.NickName,
-		AvatarID: groupMsgUser.AvatarID(),
-		FileData: buf.Bytes(),
+		UserName:   friend.UserName,
+		NickName:   friend.NickName,
+		RemarkName: remarkName,
+		AvatarID:   friend.AvatarID(),
+		FileData:   buf.Bytes(),
 	}
 
 	return userModel
@@ -230,11 +239,16 @@ func getGroupMsgUserModel(msg *openwechat.Message) (userModel *model.UserModel) 
 	}
 	utils.RespToBuf(resp, &buf)
 
+	remarkName := groupMsgUser.RemarkName
+	if len(groupMsgUser.RemarkName) == 0 {
+		remarkName = groupMsgUser.NickName
+	}
 	userModel = &model.UserModel{
-		UserName: groupMsgUser.UserName,
-		NickName: groupMsgUser.NickName,
-		AvatarID: groupMsgUser.AvatarID(),
-		FileData: buf.Bytes(),
+		UserName:   groupMsgUser.UserName,
+		NickName:   groupMsgUser.NickName,
+		RemarkName: remarkName,
+		AvatarID:   groupMsgUser.AvatarID(),
+		FileData:   buf.Bytes(),
 	}
 
 	return userModel
@@ -246,6 +260,7 @@ func getGroupMsgGroupModel(msg *openwechat.Message) (groupModel *model.GroupMode
 		utils.Logger.Errorln("获取群消息发送群失败:", err)
 		return
 	}
+
 	var buf bytes.Buffer
 	resp, err := sender.GetAvatarResponse()
 	if err != nil {
