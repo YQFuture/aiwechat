@@ -1,7 +1,8 @@
-package handle
+package dispatcher
 
 import (
 	"aiwechat/application/utils"
+	"aiwechat/handle"
 	"aiwechat/model"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/gorilla/websocket"
@@ -17,39 +18,39 @@ func MessageDispatcher(ws *websocket.Conn, bot *openwechat.Bot, messageModel *mo
 	//分发处理不同类型的消息
 	switch messageModel.Operation {
 	case model.SendMessage:
-		SendMessage(bot, messageModel)
+		handle.SendMessage(bot, messageModel)
 	case model.SendGroupMessage:
-		SendGroupMessage(bot, messageModel)
+		handle.SendGroupMessage(bot, messageModel)
 	case model.GetFriendList:
-		GetFriendList(ws, bot)
-		GetFriendHeadImgList(ws, bot)
+		handle.GetFriendList(ws, bot)
+		handle.GetFriendHeadImgList(ws, bot)
 	case model.GetGroupList:
-		GetGroupList(ws, bot)
-		GetGroupHeadImgList(ws, bot)
+		handle.GetGroupList(ws, bot)
+		handle.GetGroupHeadImgList(ws, bot)
 	case model.GetHeadImg:
-		GetHeadImg(ws, bot, messageModel)
+		handle.GetHeadImg(ws, bot, messageModel)
 	case model.GetGroupHeadImg:
-		GetGroupHeadImg(ws, bot, messageModel)
+		handle.GetGroupHeadImg(ws, bot, messageModel)
 	case model.AcceptFriendRequest:
-		AcceptFriendRequest(ws, bot, messageModel)
+		handle.AcceptFriendRequest(ws, bot, messageModel)
 	default:
 		utils.Logger.Errorln("收到未定义的请求类型", messageModel)
 	}
 }
 
 // ReceiveMessageAdapter 分发处理接收到的消息
-func ReceiveMessageAdapter(ws *websocket.Conn, bot *openwechat.Bot, msg *openwechat.Message) {
+func ReceiveMessageAdapter(ws *websocket.Conn, msg *openwechat.Message) {
 	defer func() {
 		if err := recover(); err != nil {
 			utils.Logger.Errorln("消息接收分发处理失败", err)
 		}
 	}()
 	if msg.IsSendByFriend() {
-		ReceiveFriendMessage(ws, msg)
+		handle.ReceiveFriendMessage(ws, msg)
 	} else if msg.IsSendByGroup() {
-		ReceiveGroupMessage(ws, msg)
+		handle.ReceiveGroupMessage(ws, msg)
 	} else if msg.IsFriendAdd() {
 		utils.Logger.Infoln("收到未定义的消息类型", msg)
-		ReceiveFriendAdd(ws, msg)
+		handle.ReceiveFriendAdd(ws, msg)
 	}
 }
