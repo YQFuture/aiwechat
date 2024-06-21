@@ -11,7 +11,7 @@ import (
 func MessageDispatcher(ws *websocket.Conn, bot *openwechat.Bot, messageModel *model.RequestModel) {
 	defer func() {
 		if err := recover(); err != nil {
-			utils.Logger.Errorln("消息分发处理失败", err)
+			utils.Logger.Errorln("请求分发处理失败", err)
 		}
 	}()
 	//分发处理不同类型的消息
@@ -32,9 +32,8 @@ func MessageDispatcher(ws *websocket.Conn, bot *openwechat.Bot, messageModel *mo
 		GetGroupHeadImg(ws, bot, messageModel)
 	case model.AcceptFriendRequest:
 		AcceptFriendRequest(ws, bot, messageModel)
-
 	default:
-		//TODO
+		utils.Logger.Errorln("收到未定义的请求类型", messageModel)
 	}
 }
 
@@ -50,6 +49,7 @@ func ReceiveMessageAdapter(ws *websocket.Conn, bot *openwechat.Bot, msg *openwec
 	} else if msg.IsSendByGroup() {
 		ReceiveGroupMessage(ws, msg)
 	} else if msg.IsFriendAdd() {
+		utils.Logger.Infoln("收到未定义的消息类型", msg)
 		ReceiveFriendAdd(ws, msg)
 	}
 }
