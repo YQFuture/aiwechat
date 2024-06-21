@@ -68,15 +68,16 @@ func botInit(ws *websocket.Conn, bot *openwechat.Bot) {
 		}
 		responseModelBytes, err := json.Marshal(responseModel)
 		if err != nil {
-			log.Fatal("登录二维码序列化失败", err)
+			utils.Logger.Errorln("登录二维码序列化失败", err)
 		}
 		err = ws.WriteMessage(websocket.TextMessage, responseModelBytes)
 		if err != nil {
-			log.Fatal("发送二维码链接失败", err)
+			utils.Logger.Errorln("发送二维码链接失败", err)
 		}
 	}
 	//注册消息处理函数
 	bot.MessageHandler = func(msg *openwechat.Message) {
+		utils.Logger.Infoln("收到消息", msg)
 		go handle.ReceiveMessageAdapter(ws, bot, msg)
 	}
 	//登录回调函数
