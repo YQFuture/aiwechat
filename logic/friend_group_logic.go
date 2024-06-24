@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"github.com/eatmoreapple/openwechat"
 	"github.com/gorilla/websocket"
+	"sync"
 	"time"
 )
 
@@ -230,29 +231,43 @@ func GetFriendHeadImgList(ws *websocket.Conn, bot *openwechat.Bot) {
 	//创建好友列表
 	friendList := model.UserModelList{}
 
-	for _, friend := range Friends {
-		//获取用户头像
-		var buf bytes.Buffer
-		resp, err := friend.GetAvatarResponse()
-		if err != nil {
-			return
-		}
-		utils.RespToBuf(resp, &buf)
+	var headImgMap sync.Map
+	var waitGroup sync.WaitGroup
 
-		remarkName := friend.RemarkName
-		if len(friend.RemarkName) == 0 {
-			remarkName = friend.NickName
-		}
-		userModel := &model.UserModel{
-			UserName:   friend.UserName,
-			NickName:   friend.NickName,
-			RemarkName: remarkName,
-			AvatarID:   friend.AvatarID(),
-			FileData:   buf.Bytes(),
-		}
-		//将解析的好友列表保存到切片中
-		friendList = append(friendList, userModel)
+	waitGroup.Add(len(Friends))
+
+	for _, friend := range Friends {
+		go func() {
+			defer waitGroup.Done()
+			//获取用户头像
+			var buf bytes.Buffer
+			resp, err := friend.GetAvatarResponse()
+			if err != nil {
+				return
+			}
+			utils.RespToBuf(resp, &buf)
+			remarkName := friend.RemarkName
+			if len(friend.RemarkName) == 0 {
+				remarkName = friend.NickName
+			}
+			userModel := &model.UserModel{
+				UserName:   friend.UserName,
+				NickName:   friend.NickName,
+				RemarkName: remarkName,
+				AvatarID:   friend.AvatarID(),
+				FileData:   buf.Bytes(),
+			}
+			headImgMap.Store(friend.AvatarID(), userModel)
+		}()
 	}
+
+	waitGroup.Wait()
+
+	headImgMap.Range(func(key, value interface{}) bool {
+		userModel := value.(*model.UserModel)
+		friendList = append(friendList, userModel)
+		return true
+	})
 
 	//按照首字母分组
 	groupByInitial := model.UserGroupByInitial(friendList)

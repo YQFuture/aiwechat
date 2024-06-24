@@ -50,7 +50,6 @@ func ReceiveMessageDispatcher(ws *websocket.Conn, msg *openwechat.Message) {
 	} else if msg.IsSendByGroup() {
 		logic.ReceiveGroupMessage(ws, msg)
 	} else if msg.IsFriendAdd() {
-		utils.Logger.Infoln("收到未定义的消息类型", msg)
 		logic.ReceiveFriendAdd(ws, msg)
 	}
 }
