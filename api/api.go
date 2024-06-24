@@ -79,7 +79,7 @@ func botInit(ws *websocket.Conn, bot *openwechat.Bot) {
 	//注册消息处理函数
 	bot.MessageHandler = func(msg *openwechat.Message) {
 		utils.Logger.Infoln("收到消息", msg)
-		handle.ReceiveMessageHandle(ws, msg)
+		go handle.ReceiveMessageHandle(ws, msg)
 	}
 	//登录回调函数
 	bot.LoginCallBack = func(body openwechat.CheckLoginResponse) {

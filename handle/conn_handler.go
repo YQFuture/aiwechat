@@ -51,5 +51,5 @@ func autoLogout(ws *websocket.Conn, bot *openwechat.Bot) {
 }
 
 func ReceiveMessageHandle(ws *websocket.Conn, msg *openwechat.Message) {
-	go dispatcher.ReceiveMessageDispatcher(ws, msg)
+	dispatcher.ReceiveMessageDispatcher(ws, msg)
 }
