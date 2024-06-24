@@ -24,6 +24,12 @@ func ConnHandler(ws *websocket.Conn, bot *openwechat.Bot) {
 		// 解析成自定义的消息格式
 		var messageModel model.RequestModel
 		err = json.Unmarshal(message, &messageModel)
+		if err != nil {
+			utils.Logger.Errorln("解析请求失败", err)
+			continue
+		}
+
+		utils.Logger.Infoln("解析请求结果", messageModel)
 
 		//分发处理
 		go dispatcher.MessageDispatcher(ws, bot, &messageModel)

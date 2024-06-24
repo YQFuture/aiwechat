@@ -16,28 +16,24 @@ func SendMessage(bot *openwechat.Bot, messageModel *model.RequestModel) {
 	//如果消息类型是图片/文件, 则预先创建
 	var file *os.File
 	if messageModel.MessageType == model.ImageMessage || messageModel.MessageType == model.VideoMessage {
-		file, err := os.Create(messageModel.FileName)
-		if err != nil {
-			utils.Logger.Errorln("创建文件出错", err)
-			return
-		}
+		CreateFile(messageModel)
+	}
 
+	Friends, err := self.Friends()
+
+	if messageModel.MessageType == model.ImageMessage || messageModel.MessageType == model.VideoMessage {
+		file, err = OpenFile(messageModel)
 		defer func(file *os.File) {
 			err := file.Close()
 			if err != nil {
 				utils.Logger.Errorln("关闭文件出错", err)
-				return
 			}
 		}(file)
-
-		_, err = file.Write(messageModel.FileData)
 		if err != nil {
-			utils.Logger.Errorln("写入文件出错", err)
+			utils.Logger.Errorln("打开文件出错", err)
 			return
 		}
 	}
-
-	Friends, err := self.Friends()
 
 	for _, friend := range Friends {
 		if friend.AvatarID() == messageModel.MessageTarget {
@@ -74,28 +70,24 @@ func SendGroupMessage(bot *openwechat.Bot, messageModel *model.RequestModel) {
 	//如果消息类型是图片/文件, 则预先创建
 	var file *os.File
 	if messageModel.MessageType == model.ImageMessage || messageModel.MessageType == model.VideoMessage {
-		file, err := os.Create(messageModel.FileName)
-		if err != nil {
-			utils.Logger.Errorln("创建文件出错", err)
-			return
-		}
+		CreateFile(messageModel)
+	}
 
+	Groups, err := self.Groups()
+
+	if messageModel.MessageType == model.ImageMessage || messageModel.MessageType == model.VideoMessage {
+		file, err = OpenFile(messageModel)
 		defer func(file *os.File) {
 			err := file.Close()
 			if err != nil {
 				utils.Logger.Errorln("关闭文件出错", err)
-				return
 			}
 		}(file)
-
-		_, err = file.Write(messageModel.FileData)
 		if err != nil {
-			utils.Logger.Errorln("写入文件出错", err)
+			utils.Logger.Errorln("打开文件出错", err)
 			return
 		}
 	}
-
-	Groups, err := self.Groups()
 
 	for _, group := range Groups {
 		if group.AvatarID() == messageModel.MessageTarget {
@@ -121,4 +113,32 @@ func SendGroupMessage(bot *openwechat.Bot, messageModel *model.RequestModel) {
 			}
 		}
 	}
+}
+
+func CreateFile(messageModel *model.RequestModel) {
+	file, err := os.Create(messageModel.FileName)
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			utils.Logger.Errorln("关闭文件出错", err)
+		}
+	}(file)
+	if err != nil {
+		utils.Logger.Errorln("创建文件出错", err)
+		return
+	}
+	_, err = file.Write(messageModel.FileData)
+	if err != nil {
+		utils.Logger.Errorln("写入文件出错", err)
+		return
+	}
+}
+
+func OpenFile(messageModel *model.RequestModel) (*os.File, error) {
+	file, err := os.Open(messageModel.FileName)
+	if err != nil {
+		utils.Logger.Errorln("打开文件出错", err)
+		return nil, err
+	}
+	return file, nil
 }
