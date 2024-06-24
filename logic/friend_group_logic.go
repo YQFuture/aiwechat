@@ -142,23 +142,37 @@ func GetGroupHeadImgList(ws *websocket.Conn, bot *openwechat.Bot) {
 	//创建群列表
 	groupList := model.GroupModelList{}
 
-	for _, group := range Groups {
-		//获取群头像
-		var buf bytes.Buffer
-		resp, err := group.GetAvatarResponse()
-		if err != nil {
-			return
-		}
-		utils.RespToBuf(resp, &buf)
+	var headImgMap sync.Map
+	var waitGroup sync.WaitGroup
 
-		groupModel := &model.GroupModel{
-			GroupName: group.NickName,
-			AvatarID:  group.AvatarID(),
-			FileData:  buf.Bytes(),
-		}
-		//将解析的群保存到列表中
-		groupList = append(groupList, groupModel)
+	waitGroup.Add(len(Groups))
+
+	for _, group := range Groups {
+		go func() {
+			defer waitGroup.Done()
+			//获取群头像
+			var buf bytes.Buffer
+			resp, err := group.GetAvatarResponse()
+			if err != nil {
+				return
+			}
+			utils.RespToBuf(resp, &buf)
+			groupModel := &model.GroupModel{
+				GroupName: group.NickName,
+				AvatarID:  group.AvatarID(),
+				FileData:  buf.Bytes(),
+			}
+			headImgMap.Store(group.AvatarID(), groupModel)
+		}()
 	}
+
+	waitGroup.Wait()
+
+	headImgMap.Range(func(key, value interface{}) bool {
+		groupModel := value.(*model.GroupModel)
+		groupList = append(groupList, groupModel)
+		return true
+	})
 
 	groupListBytes, err := json.Marshal(groupList)
 	if err != nil {

@@ -18,7 +18,7 @@ func RouteInit() {
 	route.Route(engine)
 
 	// 启动服务
-	err := engine.Run(":8080")
+	err := engine.Run(":7050")
 	if err != nil {
 		log.Fatal("Failed to listening and serving HTTP", err)
 		return
