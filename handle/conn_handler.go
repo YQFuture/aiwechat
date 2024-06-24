@@ -2,6 +2,7 @@ package handle
 
 import (
 	"aiwechat/application/utils"
+	"aiwechat/handle/dispatcher"
 	"aiwechat/model"
 	"encoding/json"
 	"github.com/eatmoreapple/openwechat"
@@ -25,7 +26,7 @@ func ConnHandler(ws *websocket.Conn, bot *openwechat.Bot) {
 		err = json.Unmarshal(message, &messageModel)
 
 		//分发处理
-		go MessageDispatcher(ws, bot, &messageModel)
+		go dispatcher.MessageDispatcher(ws, bot, &messageModel)
 	}
 }
 
@@ -41,4 +42,8 @@ func autoLogout(ws *websocket.Conn, bot *openwechat.Bot) {
 		}
 		return nil
 	})
+}
+
+func ReceiveMessageHandle(ws *websocket.Conn, msg *openwechat.Message) {
+	go dispatcher.ReceiveMessageDispatcher(ws, msg)
 }

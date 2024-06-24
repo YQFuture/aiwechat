@@ -1,4 +1,4 @@
-package handle
+package logic
 
 import (
 	"aiwechat/application/utils"
@@ -13,7 +13,6 @@ import (
 
 // MsgMap 保存好友请求等消息
 var MsgMap sync.Map
-var GroupMap sync.Map
 
 func ReceiveFriendAdd(ws *websocket.Conn, msg *openwechat.Message) {
 	sender, err := msg.Sender()

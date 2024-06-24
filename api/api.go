@@ -3,6 +3,7 @@ package api
 import (
 	"aiwechat/application/utils"
 	"aiwechat/handle"
+	"aiwechat/logic"
 	"aiwechat/model"
 	"encoding/json"
 	"fmt"
@@ -78,10 +79,10 @@ func botInit(ws *websocket.Conn, bot *openwechat.Bot) {
 	//注册消息处理函数
 	bot.MessageHandler = func(msg *openwechat.Message) {
 		utils.Logger.Infoln("收到消息", msg)
-		go handle.ReceiveMessageAdapter(ws, msg)
+		handle.ReceiveMessageHandle(ws, msg)
 	}
 	//登录回调函数
 	bot.LoginCallBack = func(body openwechat.CheckLoginResponse) {
-		handle.LoginCallBack(ws, bot, body)
+		logic.LoginCallBack(ws, bot, body)
 	}
 }
