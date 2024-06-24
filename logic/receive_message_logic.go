@@ -198,6 +198,7 @@ func ReceiveUnknownMessage(ws *websocket.Conn, msg *openwechat.Message, messageT
 	model.ReturnModel(ws, responseModel)
 }
 
+// 获取好友消息发送者
 func getFriendMsgUserModel(msg *openwechat.Message) (userModel *model.UserModel) {
 	friend, err := msg.Sender()
 	if err != nil {
@@ -225,6 +226,7 @@ func getFriendMsgUserModel(msg *openwechat.Message) (userModel *model.UserModel)
 	return userModel
 }
 
+// 获取群消息发送者
 func getGroupMsgUserModel(msg *openwechat.Message) (userModel *model.UserModel) {
 	groupMsgUser, err := msg.SenderInGroup()
 	if err != nil {
@@ -253,6 +255,7 @@ func getGroupMsgUserModel(msg *openwechat.Message) (userModel *model.UserModel) 
 	return userModel
 }
 
+// 获取群消息发送群
 func getGroupMsgGroupModel(msg *openwechat.Message) (groupModel *model.GroupModel) {
 	sender, err := msg.Sender()
 	if err != nil {
