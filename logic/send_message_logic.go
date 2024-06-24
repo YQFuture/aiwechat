@@ -18,16 +18,11 @@ func SendMessage(bot *openwechat.Bot, messageModel *model.RequestModel) {
 	if messageModel.MessageType == model.ImageMessage || messageModel.MessageType == model.VideoMessage {
 		CreateFile(messageModel)
 		file, err = OpenFile(messageModel)
-		defer func(file *os.File) {
-			err := file.Close()
-			if err != nil {
-				utils.Logger.Errorln("关闭文件出错", err)
-			}
-		}(file)
 		if err != nil {
 			utils.Logger.Errorln("打开文件出错", err)
 			return
 		}
+		defer ReleaseFile(file, messageModel.FileName)
 	}
 
 	Friends, err := self.Friends()
@@ -69,16 +64,11 @@ func SendGroupMessage(bot *openwechat.Bot, messageModel *model.RequestModel) {
 	if messageModel.MessageType == model.ImageMessage || messageModel.MessageType == model.VideoMessage {
 		CreateFile(messageModel)
 		file, err = OpenFile(messageModel)
-		defer func(file *os.File) {
-			err := file.Close()
-			if err != nil {
-				utils.Logger.Errorln("关闭文件出错", err)
-			}
-		}(file)
 		if err != nil {
 			utils.Logger.Errorln("打开文件出错", err)
 			return
 		}
+		defer ReleaseFile(file, messageModel.FileName)
 	}
 
 	Groups, err := self.Groups()
@@ -135,4 +125,17 @@ func OpenFile(messageModel *model.RequestModel) (*os.File, error) {
 		return nil, err
 	}
 	return file, nil
+}
+
+// ReleaseFile 释放文件资源
+func ReleaseFile(file *os.File, filename string) {
+	err := file.Close()
+	if err != nil {
+		utils.Logger.Errorln("关闭文件出错", err)
+	}
+	err = os.Remove(filename)
+	if err != nil {
+		utils.Logger.Errorln("删除文件出错", err)
+		return
+	}
 }
