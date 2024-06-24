@@ -17,11 +17,6 @@ func SendMessage(bot *openwechat.Bot, messageModel *model.RequestModel) {
 	var file *os.File
 	if messageModel.MessageType == model.ImageMessage || messageModel.MessageType == model.VideoMessage {
 		CreateFile(messageModel)
-	}
-
-	Friends, err := self.Friends()
-
-	if messageModel.MessageType == model.ImageMessage || messageModel.MessageType == model.VideoMessage {
 		file, err = OpenFile(messageModel)
 		defer func(file *os.File) {
 			err := file.Close()
@@ -34,6 +29,8 @@ func SendMessage(bot *openwechat.Bot, messageModel *model.RequestModel) {
 			return
 		}
 	}
+
+	Friends, err := self.Friends()
 
 	for _, friend := range Friends {
 		if friend.AvatarID() == messageModel.MessageTarget {
@@ -71,11 +68,6 @@ func SendGroupMessage(bot *openwechat.Bot, messageModel *model.RequestModel) {
 	var file *os.File
 	if messageModel.MessageType == model.ImageMessage || messageModel.MessageType == model.VideoMessage {
 		CreateFile(messageModel)
-	}
-
-	Groups, err := self.Groups()
-
-	if messageModel.MessageType == model.ImageMessage || messageModel.MessageType == model.VideoMessage {
 		file, err = OpenFile(messageModel)
 		defer func(file *os.File) {
 			err := file.Close()
@@ -88,6 +80,8 @@ func SendGroupMessage(bot *openwechat.Bot, messageModel *model.RequestModel) {
 			return
 		}
 	}
+
+	Groups, err := self.Groups()
 
 	for _, group := range Groups {
 		if group.AvatarID() == messageModel.MessageTarget {
