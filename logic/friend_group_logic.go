@@ -98,7 +98,7 @@ func GetGroupList(ws *websocket.Conn, bot *openwechat.Bot) {
 	if err != nil {
 		return
 	}
-	Groups, err := self.Groups(true)
+	Groups, err := self.Groups()
 	if err != nil {
 		return
 	}
@@ -134,7 +134,7 @@ func GetGroupHeadImgList(ws *websocket.Conn, bot *openwechat.Bot) {
 	if err != nil {
 		return
 	}
-	Groups, err := self.Groups(true)
+	Groups, err := self.Groups()
 	if err != nil {
 		return
 	}
