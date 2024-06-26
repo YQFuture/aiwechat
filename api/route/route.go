@@ -8,7 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//go:embed frontend/dist/*
+//go:embed frontend
 var staticFiles embed.FS
 
 func Route(engine *gin.Engine) {
@@ -37,6 +37,5 @@ func Route(engine *gin.Engine) {
 		aiwechat.GET("/conn", api2.Conn)
 		//前端页面
 		// aiwechat.StaticFS("/page", http.Dir("./dist"))
-
 	}
 }
